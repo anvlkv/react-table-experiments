@@ -91,51 +91,53 @@ function Table({ columns, data, onFetchData }) {
       });
 
       return (
-        <div {...rowProps} className="tr">
+        <tr {...rowProps} className="tr">
           {!row.values.loading ? (
             row.cells.map((cell) => {
               return (
-                <div {...cell.getCellProps()} className="td">
+                <td {...cell.getCellProps()} className="td">
                   {cell.render("Cell")}
-                </div>
+                </td>
               );
             })
           ) : (
-            <div className="td">... loading</div>
+            <td className="td">... loading</td>
           )}
-        </div>
+        </tr>
       );
     },
     [prepareRow, rows]
   );
 
+  const tbody = React.createElement("tbody", { ...getTableBodyProps() });
+
   // Render the UI for your table
   return (
-    <div {...getTableProps()} className="table">
-      <div>
-        {headerGroups.map((headerGroup) => (
-          <div {...headerGroup.getHeaderGroupProps()} className="tr">
-            {headerGroup.headers.map((column) => (
-              <div {...column.getHeaderProps()} className="th">
-                {column.render("Header")}
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
+    // <table {...getTableProps()} className="table">
+    //   <thead>
+    //     {headerGroups.map((headerGroup) => (
+    //       <tr {...headerGroup.getHeaderGroupProps()} className="tr">
+    //         {headerGroup.headers.map((column) => (
+    //           <th {...column.getHeaderProps()} className="th">
+    //             {column.render("Header")}
+    //           </th>
+    //         ))}
+    //       </tr>
+    //     ))}
+    //   </thead>
 
-      <div {...getTableBodyProps()}>
-        <FixedSizeList
-          height={400}
-          itemCount={rows.length}
-          itemSize={35}
-          onItemsRendered={onRowsRendered}
-          width={totalColumnsWidth + scrollBarSize}
-        >
-          {RenderRow}
-        </FixedSizeList>
-      </div>
-    </div>
+    // </table>
+    <FixedSizeList
+      height={400}
+      itemCount={rows.length}
+      itemSize={35}
+      onItemsRendered={onRowsRendered}
+      width={totalColumnsWidth + scrollBarSize}
+      innerElementType="tbody"
+      outerElementType="table"
+    >
+      {RenderRow}
+    </FixedSizeList>
   );
 }
 
