@@ -41,9 +41,7 @@ const Styles = styled.div`
   }
 `;
 
-function Table({ columns, data, onFetchData }) {
-  // Use the state and functions returned from useTable to build your UI
-
+function TableSection({ columns, data, onFetchData }) {
   const defaultColumn = React.useMemo(
     () => ({
       width: 150
@@ -60,7 +58,8 @@ function Table({ columns, data, onFetchData }) {
     rows,
     totalColumnsWidth,
     prepareRow,
-    setHiddenColumns
+    setHiddenColumns,
+    columns: tableColumns,
   } = useTable(
     {
       columns,
@@ -81,6 +80,8 @@ function Table({ columns, data, onFetchData }) {
       onFetchData(overscanStartIndex, overscanStopIndex);
     }
   }
+
+  console.log(tableColumns);
 
   const RenderRow = React.useCallback(
     ({ index, style }) => {
@@ -139,6 +140,59 @@ function Table({ columns, data, onFetchData }) {
   );
 }
 
+function Table({ columns, data, onFetchData }) {
+  const sharedFetch = (start, end) => {
+    // hmm
+
+    onFetchData();
+  };
+  return [null, null, null].reduce((tables, table, at, all) => {
+    if (at === 0) {
+      //left locked
+      const leftLocked = columns.filter((c) => c.fixed === "left");
+      if (leftLocked.length) {
+        tables.push(
+          <TableSection
+            key="left"
+            columns={leftLocked}
+            data={data}
+            onFetchData={sharedFetch}
+          />
+        );
+      }
+    }
+    if (at === 2) {
+      // right locked
+      const rightLocked = columns.filter((c) => c.fixed === "right");
+      if (rightLocked.length) {
+        tables.push(
+          <TableSection
+            key="right"
+            columns={rightLocked}
+            data={data}
+            onFetchData={sharedFetch}
+          />
+        );
+      }
+    }
+    if (at === 1) {
+      const rest = columns.filter((c) => !c.fixed);
+      if (rest.length) {
+        tables.push(
+          <TableSection
+            key="center"
+            columns={rest}
+            data={data}
+            onFetchData={sharedFetch}
+          />
+        );
+      }
+    }
+
+    return tables;
+  }, []);
+}
+
 function App() {
   const columns = React.useMemo(
     () => [
@@ -147,7 +201,8 @@ function App() {
       },
       {
         Header: "Row Index",
-        accessor: (row, i) => i
+        accessor: (row, i) => i,
+        fixed: "left"
       },
       {
         Header: "A entity",
